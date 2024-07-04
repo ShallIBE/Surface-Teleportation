@@ -111,7 +111,7 @@ def create_stabilizers_direction(circuit, data, qubit_map, noise, direction):
             involved_qubits.add(ancilla_id)
     #print(involved_qubits)
     # Apply DEPOLARIZE2 to all involved qubits
-    #circuit.append('DEPOLARIZE2', list(involved_qubits), noise)
+    circuit.append('DEPOLARIZE2', list(involved_qubits), noise)
     circuit.append('TICK')
 
 
