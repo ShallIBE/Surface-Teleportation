@@ -78,11 +78,14 @@ def apply_hadamard_x_ancillas(circuit, x_ancillas, t1_ancillas, qubit_map):
     circuit.append("H", x_ancilla_ids)
     circuit.append('TICK')
 
-# Function to create stabilizers for a given direction
+## Function to create stabilizers for a given direction
 def create_stabilizers_direction(circuit, data, qubit_map, noise, direction):
     # Get diagonal neighbors and extract the given direction neighbors
     diagonal_neighbors = data['diagonal_neighbors']
     index = {'nw': 2, 'ne': 3, 'se': 4, 'sw': 5}[direction]
+    
+    # Initialize a string to collect all qubits involved in CX gates
+    depolarize_string = f'DEPOLARIZE2({noise}) '
     
     # For Z ancillas, apply CX between the neighbor and the ancilla
     for ancilla_type, ancilla, *neighbors in diagonal_neighbors:
@@ -91,6 +94,7 @@ def create_stabilizers_direction(circuit, data, qubit_map, noise, direction):
             neighbor_id = qubit_map[neighbor]
             ancilla_id = qubit_map[ancilla]
             circuit.append("CX", [neighbor_id, ancilla_id])
+            depolarize_string += f'{neighbor_id} {ancilla_id} '
     
     # For X ancillas, apply CX between the ancilla and its neighbor
     for ancilla_type, ancilla, *neighbors in diagonal_neighbors:
@@ -99,20 +103,12 @@ def create_stabilizers_direction(circuit, data, qubit_map, noise, direction):
             neighbor_id = qubit_map[neighbor]
             ancilla_id = qubit_map[ancilla]
             circuit.append("CX", [ancilla_id, neighbor_id])
+            depolarize_string += f'{ancilla_id} {neighbor_id} '
     
-    # Collect all qubits involved in CX gates
-    involved_qubits = set()
-    for ancilla_type, ancilla, *neighbors in diagonal_neighbors:
-        neighbor = neighbors[index - 2]
-        if neighbor is not None and neighbor != '#':
-            neighbor_id = qubit_map[neighbor]
-            ancilla_id = qubit_map[ancilla]
-            involved_qubits.add(neighbor_id)
-            involved_qubits.add(ancilla_id)
-    #print(involved_qubits)
     # Apply DEPOLARIZE2 to all involved qubits
-    circuit.append('DEPOLARIZE2', list(involved_qubits), noise)
+    circuit += stim.Circuit(f'{depolarize_string.strip()}')
     circuit.append('TICK')
+
 
 
 # Function to create all stabilizers
