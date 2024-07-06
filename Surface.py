@@ -266,13 +266,18 @@ def draw_surface_code_svg(matrix, x_ancillas, z_ancillas, n, m):
                 dwg.add(dwg.text(matrix[i, j], insert=((j + 0.5) * cell_size, (i + 0.5) * cell_size + title_height),
                                  text_anchor="middle", dominant_baseline="middle", font_size=12, fill='white'))
 
+
+    # Determine the legend annotation for green
+    contains_t = any(cell.startswith('T') for row in matrix for cell in row if cell != '#')
+    green_annotation = 'Bell Pair' if contains_t else 'Cut Along'
+
     # Add legend
     legend_y = rows * cell_size + title_height + 10
     legend_items = [
         ('grey', 'Physical Qubits'),
         ('red', 'X Ancilla'),
         ('blue', 'Z Ancilla'),
-        ('green', 'Bell Pair')
+        ('green', green_annotation)
     ]
     for idx, (color, label) in enumerate(legend_items):
         x_start = 10
