@@ -334,6 +334,25 @@ def add_final_detectors(circuit, data, qubit_map, measurement_order):
     circuit.append("TICK")
 
 
+# Function to include observable
+def include_observable(circuit, data, qubit_map, measurement_order):
+    # Get the penultimate column
+    penultimate_column = data['cut_matrix'][:, -2]
+    
+    # Extract Q qubits in the penultimate column
+    q_qubits = [qubit_map[q] for q in penultimate_column if isinstance(q, str) and q.startswith('Q')]
+    
+    # Create the list of references
+    references = []
+    for q in q_qubits:
+        index = measurement_order.index(q)
+        backwards_reference = -(len(measurement_order) - index)
+        references.append(backwards_reference)
+    
+    # Create the OBSERVABLE_INCLUDE line
+    recs = " ".join([f"rec[{ref}]" for ref in references])
+    circuit += stim.Circuit(f"OBSERVABLE_INCLUDE(0) {recs}")
+    circuit.append("TICK")
 
 
 
@@ -380,6 +399,9 @@ def generate_circuit(data, noise, rounds):
 
     # Add final detectors
     add_final_detectors(circuit, data, qubit_map, measurement_order)
+    
+    # Include observable
+    include_observable(circuit, data, qubit_map, measurement_order)
 
     return circuit
 

@@ -130,51 +130,59 @@ def classify_ancillas(matrix):
 
     for i in range(rows):
         for j in range(cols):
-            if isinstance(matrix[i,j], str) and matrix[i, j][0] in {'A'}: 
-                A_Ancillas.append(matrix[i,j])
-            if isinstance(matrix[i,j], str) and matrix[i, j][0] in {'B'}:
-                B_Ancillas.append(matrix[i,j])  
-            if isinstance(matrix[i,j], str) and matrix[i, j][0] in {'T'} and matrix[i,j][-1] == '3':
-                T3_Ancillas.append(matrix[i,j])    
-            if isinstance(matrix[i,j], str) and matrix[i, j][0] in {'T'} and matrix[i,j][-1] == '2':
-                T2_Ancillas.append(matrix[i,j])    
-            if isinstance(matrix[i,j], str) and matrix[i, j][0] in {'T'} and matrix[i,j][-1] == '1':
-                T1_Ancillas.append(matrix[i,j])                      
-            if isinstance(matrix[i,j], str) and matrix[i, j][0] in {'Q'}:
-                Qubits.append(matrix[i,j])
+            if isinstance(matrix[i, j], str) and matrix[i, j][0] in {'A'}:
+                A_Ancillas.append(matrix[i, j])
+            if isinstance(matrix[i, j], str) and matrix[i, j][0] in {'B'}:
+                B_Ancillas.append(matrix[i, j])
+            if isinstance(matrix[i, j], str) and matrix[i, j][0] in {'T'} and matrix[i, j][-1] == '3':
+                T3_Ancillas.append(matrix[i, j])
+            if isinstance(matrix[i, j], str) and matrix[i, j][0] in {'T'} and matrix[i, j][-1] == '2':
+                T2_Ancillas.append(matrix[i, j])
+            if isinstance(matrix[i, j], str) and matrix[i, j][0] in {'T'} and matrix[i, j][-1] == '1':
+                T1_Ancillas.append(matrix[i, j])
+            if isinstance(matrix[i, j], str) and matrix[i, j][0] in {'Q'}:
+                Qubits.append(matrix[i, j])
 
-    Z_Ancillas=[]
-    X_Ancillas=[]
-    for i in range(2,rows):
-            counter=((i/2) -1)%2
-            for j in range(cols):
-                if isinstance(matrix[i,j], str) and matrix[i, j][0] in {'B'}:
-                    if counter%2 ==0 :
-                        Z_Ancillas.append(matrix[i,j])
-                        counter+=1
-                    else:
-                        X_Ancillas.append(matrix[i,j])
-                        counter+=1
-                elif isinstance(matrix[i,j], str) and matrix[i, j][0] in {'T'} and matrix[i,j][-1] == '1':
-                    if counter%2 ==0 :
-                        Z_Ancillas.append(matrix[i,j])
-                        counter+=1
-                    else:
-                        X_Ancillas.append(matrix[i,j])
-                        counter+=1
-    for i in (0,rows-1):
+    X_Ancillas = []
+    Z_Ancillas = []
+    for i in range(2, rows - 1):
+        counter = ((i / 2) - 1) % 2
         for j in range(cols):
-            if isinstance(matrix[i,j], str) and matrix[i, j][0] in {'A'}:
-                X_Ancillas.append(matrix[i,j])
-            elif isinstance(matrix[i,j], str) and matrix[i, j][0] in {'T'} and matrix[i,j][-1] == '1':
-                X_Ancillas.append(matrix[i,j])
-
-    for i in range(0,rows):
-            for j in (0,cols-1):
-                if isinstance(matrix[i,j], str) and matrix[i, j][0] in {'A'}:
-                    Z_Ancillas.append(matrix[i,j])
-                elif isinstance(matrix[i, j], str) and matrix[i, j][0] in {'T'} and matrix[i, j][-1] == '1':
+            if isinstance(matrix[i, j], str) and matrix[i, j][0] in {'B'}:
+                if counter % 2 == 0:
+                    X_Ancillas.append(matrix[i, j])
+                    counter += 1
+                else:
                     Z_Ancillas.append(matrix[i, j])
+                    counter += 1
+            elif isinstance(matrix[i, j], str) and matrix[i, j][0] in {'T'} and matrix[i, j][-1] == '1':
+                if counter % 2 == 0:
+                    X_Ancillas.append(matrix[i, j])
+                    counter += 1
+                else:
+                    Z_Ancillas.append(matrix[i, j])
+                    counter += 1
+
+    for i in (0, rows - 1):
+        for j in range(cols):
+            if isinstance(matrix[i, j], str) and matrix[i, j][0] in {'A'}:
+                Z_Ancillas.append(matrix[i, j])
+            elif isinstance(matrix[i, j], str) and matrix[i, j][0] in {'T'} and matrix[i, j][-1] == '1':
+                Z_Ancillas.append(matrix[i, j])
+
+    for i in range(0, rows):
+        for j in (0, cols - 1):
+            if isinstance(matrix[i, j], str) and matrix[i, j][0] in {'A'}:
+                X_Ancillas.append(matrix[i, j])
+            elif isinstance(matrix[i, j], str) and matrix[i, j][0] in {'T'} and matrix[i, j][-1] == '1':
+                X_Ancillas.append(matrix[i, j])
+
+    for element in Z_Ancillas.copy():  # Use a copy to avoid modifying the list while iterating
+        if element.startswith('T') and element.endswith('1'):
+            # Create a new element with the last digit changed to '3'
+            new_element = element[:-1] + '3'
+            # Append the new element to Z_Ancillas
+            Z_Ancillas.append(new_element)
 
     for element in X_Ancillas.copy():  # Use a copy to avoid modifying the list while iterating
         if element.startswith('T') and element.endswith('1'):
@@ -182,13 +190,6 @@ def classify_ancillas(matrix):
             new_element = element[:-1] + '3'
             # Append the new element to X_Ancillas
             X_Ancillas.append(new_element)
-
-    for element in Z_Ancillas.copy():  # Use a copy to avoid modifying the list while iterating
-        if element.startswith('T') and element.endswith('1'):
-            # Create a new element with the last digit changed to '3'
-            new_element = element[:-1] + '3'
-            # Append the new element to X_Ancillas
-            Z_Ancillas.append(new_element)
 
     return X_Ancillas, Z_Ancillas, B_Ancillas, T3_Ancillas, T2_Ancillas, T1_Ancillas, A_Ancillas, Qubits
 
